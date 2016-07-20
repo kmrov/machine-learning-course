@@ -62,10 +62,7 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-eye_num = eye(num_labels);
-for i = 1:m
-  yy(i, :) = eye_num(y(i), :);
-endfor
+yy = bsxfun(@eq, y(:), 1:num_labels);
 
 a2 = sigmoid(Theta1 * [ones(m,1) X]');
 a3 = sigmoid(Theta2 * [ones(m,1) a2']');
