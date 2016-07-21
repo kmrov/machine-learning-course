@@ -64,8 +64,12 @@ Theta2_grad = zeros(size(Theta2));
 
 yy = bsxfun(@eq, y(:), 1:num_labels);
 
-a2 = sigmoid(Theta1 * [ones(m,1) X]');
-a3 = sigmoid(Theta2 * [ones(m,1) a2']');
+z2 = Theta1 * [ones(m,1) X]';
+a2 = sigmoid(z2);
+
+z3 = Theta2 * [ones(m,1) a2']';
+a3 = sigmoid(z3);
+
 h = a3;
 
 J = sum(sum((-(yy')) .* log(h) - (1 - yy') .* log(1 - h))) / m;
@@ -73,6 +77,32 @@ J = sum(sum((-(yy')) .* log(h) - (1 - yy') .* log(1 - h))) / m;
 J = J + (lambda / (2*m)) * (sum(Theta1(:, 2:end)(:) .^ 2) + sum(Theta2(:, 2:end)(:) .^ 2));
 
 % -------------------------------------------------------------
+
+for t = 1:m
+  xxx = X(t, :);
+  yyy = yy(t, :);
+
+  z2 = Theta1 * [1 xxx]';
+  a2 = sigmoid(z2);
+
+  z3 = Theta2 * [1; a2];
+  a3 = sigmoid(z3);
+
+  h = a3;
+
+  delta3 = h - yyy';
+  delta2 = (Theta2' * delta3) .* sigmoidGradient([1; z2]);
+  delta2 = delta2(2:end);
+
+  Theta1_grad += delta2 * [1 xxx];
+  Theta2_grad += delta3 * [1 a2'];
+endfor
+
+Theta1_grad ./=  m;
+Theta2_grad ./=  m;
+
+Theta1_grad(:, 2:end) += ((lambda/m) * Theta1(:, 2:end));
+Theta2_grad(:, 2:end) += ((lambda/m) * Theta2(:, 2:end));
 
 % =========================================================================
 
